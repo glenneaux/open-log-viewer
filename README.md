@@ -18,7 +18,7 @@ Select the main log and click **Export CSV**. This exports all recorded channels
 
 - **MoTeC `.ld`:** integer and floating-point samples, channel scaling and mixed sample rates. Synthetic tests pass. Mixed-rate channels use sample-and-hold; no values are extended past a channel's recording end. M1/ADL variants, enums and `.ldx` lap metadata still need real-file coverage.
 - **Haltech multi-session/bundled HLG:** merges channels by ID and unit type, leaves missing channels blank, and shifts restarted clocks onto a continuous timeline. Synthetic tests pass, but no real multi-session container has been supplied. When a clock restarts, the actual gap between sessions is unknown; the importer uses one sample interval and records that adjustment internally.
-- **MLVLG v2:** synthetic decoding and browser-import tests pass; real rusEFI/MegaSquirt recordings remain untested.
+- **MLVLG v1/v2:** scalar values and named bit flags are implemented. Synthetic tests cover both versions, bit labels, corrupt metadata, checksum rejection and clock rollover; the v2 browser-import test passes. Real rusEFI/MegaSquirt recordings remain untested. Markers attach to the next valid sample (or the final sample at EOF); exact marker timestamp alignment is not implemented.
 
 Single-session Haltech import remains verified against the supplied NSP CSV. Unsupported binary formats remain listed separately below; they are not described as merely untested.
 

@@ -9,7 +9,7 @@ This is a working browser/desktop port in progress, not feature parity with the 
 - Independent NSP CSV comparison for the supplied private log.
 - Electron desktop startup with sandboxing, context isolation and Node integration disabled.
 - Full-height browser workspace at multiple viewport sizes.
-- MLVLG v2 scalar decoding has synthetic tests for signed values, scaling, timestamp wrap and checksum rejection; real-file validation is pending.
+- MLVLG v1/v2 scalar and named-bit decoding has synthetic tests for signed values, scaling, timestamp wrap, marker anchoring, invalid bit metadata and checksum rejection; real-file validation is pending.
 - Desktop file handoff and window-size persistence are implemented; cross-platform validation is pending.
 - MoTeC LD decoding and Haltech session merging pass synthetic tests; no real samples of these variants have been provided. See the main README for alignment semantics and limits.
 
