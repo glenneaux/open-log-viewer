@@ -36636,6 +36636,12 @@ ${o.rowName}: ${Sa(fu(a.rv, o.dec.row.token), o.rowCh)}${p}`;
         ),
         await Zt());
       try {
+        let containerText;
+        if (/\.MaxxECU-Zip-log$/i.test(c.name)) {
+          const {unpackMaxxecu}=await import('./formats/maxxecu.js');
+          const result=await unpackMaxxecu(await c.arrayBuffer());
+          containerText=result.text;c.__maxxMeta=result.meta;
+        }
         if (/\.hlgzip$/i.test(c.name) && !c.__engineParsed) {
           const { loadHaltechFile } = await import('./haltech-import.js');
           await loadHaltechFile(c);
@@ -36655,7 +36661,7 @@ ${o.rowName}: ${Sa(fu(a.rv, o.dec.row.token), o.rowCh)}${p}`;
           c,
           c.__engineParsed
             ? { parsed: c.__engineParsed }
-            : { text: await c.text() },
+            : { text: containerText ?? await c.text() },
           u,
         );
       } catch (d) {
@@ -36862,7 +36868,8 @@ ${o.rowName}: ${Sa(fu(a.rv, o.dec.row.token), o.rowCh)}${p}`;
       u = (e && e.__superflowMeta) || null,
       d = (e && e.__mlgMeta) || null,
       f = (e && e.__emtronMeta) || null;
-    (c && (o = "motec"),
+    (s && (o = "maxxecu"),
+      c && (o = "motec"),
       u && (o = "superflow"),
       d && (o = "mlg"),
       f && (o = "emtron"));

@@ -1,5 +1,13 @@
 import { test, expect } from "@playwright/test";
 import {fileURLToPath} from 'node:url';
+import {zipFixture} from '../zip-fixture.js';
+
+test('imports a synthetic MaxxECU text package',async({page})=>{
+ await page.goto('/');
+ await page.locator('#file-input').setInputFiles({name:'example.MaxxECU-Zip-log',mimeType:'application/zip',buffer:zipFixture('example.MaxxECU-Log','Time (s)\tRPM\n0\t1000\n1\t2000\n2\t3000\n',true)});
+ await expect(page.locator('#file-info')).toContainText('3 samples');
+ await expect(page.locator('#main')).toContainText('RPM');
+});
 test('imports a synthetic MoTeC LD file',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');

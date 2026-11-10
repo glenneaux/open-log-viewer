@@ -1,6 +1,6 @@
 // Shared binary loader used by the application's normal multi-file pipeline.
 const input = document.getElementById("file-input");
-input.accept += ",.hlgzip,.mlg,.ld";
+input.accept += ",.hlgzip,.mlg,.ld,.MaxxECU-Zip-log,.MaxxECU-Log";
 export async function loadHaltechFile(file) {
   const buffer = await file.arrayBuffer();
   const parsed = await new Promise((resolve, reject) => {

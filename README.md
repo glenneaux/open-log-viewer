@@ -16,6 +16,7 @@ Select the main log and click **Export CSV**. This exports all recorded channels
 
 ### Implemented, awaiting real-file validation
 
+- **MaxxECU `.MaxxECU-Zip-log` text packages:** stored/deflated ZIP members containing one `.MaxxECU-Log` stream can be opened. Synthetic decoder and browser tests pass; real packages are untested. `.LogMetaData` sample rates and `.MaxxECU-save` tune units are not applied yet. The existing text parser derives timing from a usable time channel or falls back to sample indices; do not assume that fallback represents seconds. Binary `.maxxlog` and multiple text streams remain unsupported.
 - **MoTeC `.ld`:** integer and floating-point samples, channel scaling and mixed sample rates. Synthetic tests pass. Mixed-rate channels use sample-and-hold; no values are extended past a channel's recording end. M1/ADL variants, enums and `.ldx` lap metadata still need real-file coverage.
 - **Haltech multi-session/bundled HLG:** merges channels by ID and unit type, leaves missing channels blank, and shifts restarted clocks onto a continuous timeline. Synthetic tests pass, but no real multi-session container has been supplied. When a clock restarts, the actual gap between sessions is unknown; the importer uses one sample interval and records that adjustment internally.
 - **MLVLG v1/v2:** scalar values and named bit flags are implemented. Synthetic tests cover both versions, bit labels, corrupt metadata, checksum rejection and clock rollover; the v2 browser-import test passes. Real rusEFI/MegaSquirt recordings remain untested. Markers attach to the next valid sample (or the final sample at EOF); exact marker timestamp alignment is not implemented.
@@ -40,3 +41,7 @@ Run `pnpm test` for decoder tests and `pnpm test:browser` for browser tests. The
 The Rust backend, native file integrations, binary log parsers, engine storage and hosted service implementation have not been fully reconstructed. The recovered desktop bridge is retained as interface documentation and is inactive in browser mode. No original executable is required by the browser build.
 
 The original JavaScript bundle is formatted for inspection; minified identifiers have not yet been renamed. Third-party vendored code retains its existing licence notices. Personal test logs and reverse-engineering working files are not part of this project.
+
+## Network behavior
+
+The port processes logs locally. The original cloud/account client is disconnected; no active telemetry or log-upload service has been identified in the port. Its content security policy blocks external fetches and images. Recovered satellite-map code still references ArcGIS, but tile requests are blocked by that policy, so satellite imagery is unavailable. The EULA is fetched from the same local application origin. Website links can be opened by the user in browser mode. The original executable has not been run for a network audit; these statements apply to this port, not the original binary.

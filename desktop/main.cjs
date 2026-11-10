@@ -4,7 +4,7 @@ const fs=require('node:fs');
 let mainWindow;
 protocol.registerSchemesAsPrivileged([{scheme:'logviewer',privileges:{standard:true,secure:true,supportFetchAPI:true,corsEnabled:true}}]);
 let ready=false,pending=[];
-const accepted=/\.(csv|tsv|txt|log|msl|vbo|gz|hlgzip|mlg|ld)$/i;
+const accepted=/\.(csv|tsv|txt|log|msl|vbo|gz|hlgzip|mlg|ld|MaxxECU-Zip-log|MaxxECU-Log)$/i;
 function queueArgs(args){pending.push(...args.filter(p=>accepted.test(p)&&path.isAbsolute(p)));flush();}
 async function flush(){
  if(!ready||!mainWindow||!pending.length)return;
