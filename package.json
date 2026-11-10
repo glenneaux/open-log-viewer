@@ -1,0 +1,20 @@
+{
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "electron": "^45.2.3",
+    "prettier": "^3.9.10"
+  },
+  "name": "open-log-viewer",
+  "version": "0.1.0",
+  "private": true,
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check web/app.js && node --check web/tauri-bridge.js",
+    "desktop": "electron .",
+    "test": "node --test test/*.test.js",
+    "test:browser": "playwright test"
+  },
+  "main": "desktop/main.cjs"
+}
