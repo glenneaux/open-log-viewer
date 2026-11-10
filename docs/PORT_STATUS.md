@@ -11,6 +11,7 @@ This is a working browser/desktop port in progress, not feature parity with the 
 - Full-height browser workspace at multiple viewport sizes.
 - MLVLG v2 scalar decoding has synthetic tests for signed values, scaling, timestamp wrap and checksum rejection; real-file validation is pending.
 - Desktop file handoff and window-size persistence are implemented; cross-platform validation is pending.
+- MoTeC LD decoding and Haltech session merging pass synthetic tests; no real samples of these variants have been provided. See the main README for alignment semantics and limits.
 
 ## Retained, needs broader regression testing
 
@@ -19,7 +20,7 @@ The recovered frontend contains comparisons, math channels, alarms, table genera
 ## Not implemented or incomplete
 
 - Other native binary formats: see [fixture checklist](FIXTURES.md).
-- Multi-session HLG files and containers holding multiple HLG streams: explicitly rejected.
+- Multi-session HLG and multiple-stream containers are implemented and synthetically tested; real-world validation and absolute wall-clock gap reconstruction remain pending.
 - Haltech tune snapshots, password-protected map workflows, HDEF enum labels and tune-table catalogues.
 - Native chunked column cache, blob/archive storage and very-large-log behavior. Browser HLG expansion is limited to 512 MB.
 - NSP registration and automatic updates. Electron replaces the original Tauri host.

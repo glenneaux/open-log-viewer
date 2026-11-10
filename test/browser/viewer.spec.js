@@ -1,5 +1,13 @@
 import { test, expect } from "@playwright/test";
 import {fileURLToPath} from 'node:url';
+test('imports a synthetic MoTeC LD file',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');
+ await page.locator('#file-input').setInputFiles(fileURLToPath(new URL('../fixtures/synthetic.ld',import.meta.url)));
+ await expect(page.locator('#file-info')).toContainText('3 samples');
+ await expect(page.locator('#main')).toContainText('RPM');
+ expect(errors).toEqual([]);
+});
 test('exports the active log as CSV',async({page})=>{
  await page.goto('/');
  await page.locator('#file-input').setInputFiles({name:'example.csv',mimeType:'text/csv',buffer:Buffer.from('Time,RPM\n0,1000\n1,2000\n')});

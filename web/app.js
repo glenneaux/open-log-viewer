@@ -36646,6 +36646,11 @@ ${o.rowName}: ${Sa(fu(a.rv, o.dec.row.token), o.rowCh)}${p}`;
           c.__engineParsed = result.parsed;
           c.__mlgMeta = result.meta;
         }
+        if (/\.ld$/i.test(c.name) && !c.__engineParsed) {
+          const {parseMotec}=await import('./formats/motec.js');
+          const result=parseMotec(await c.arrayBuffer());
+          c.__engineParsed=result.parsed;c.__motecMeta=result.meta;
+        }
         await Do(
           c,
           c.__engineParsed

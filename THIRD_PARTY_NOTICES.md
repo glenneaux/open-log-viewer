@@ -4,5 +4,6 @@
 - uPlot, copyright Leon Sorokin, is MIT licensed. See `web/vendor/UPLOT-LICENSE.txt`. Its original vendor header is retained.
 - Electron and Playwright retain the licences included in their installed packages.
 - The MLVLG v2 decoder implements [EFI Analytics' published binary format specification](https://www.efianalytics.com/TunerStudio/docs/MLG_Binary_LogFormat_2.0.pdf).
+- The new MoTeC decoder uses binary-layout information documented by [gotzl/ldparser](https://github.com/gotzl/ldparser), distributed under GPL-3.0. The JavaScript implementation adds bounded parsing and explicit mixed-rate alignment.
 
 The original hosted backend is not included or required. Personal logs, tune snapshots, the original installer and reverse-engineering working files are excluded.

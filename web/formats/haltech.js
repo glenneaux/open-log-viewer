@@ -57,6 +57,7 @@ export async function unzipHlg(bytes) {
   if (end < 0) throw Error("ZIP directory missing");
   let p = v.getUint32(end + 16, true);
   const entries = [];
+  let totalExpanded = 0;
   for (let i = 0; i < v.getUint16(end + 10, true); i++) {
     if (p + 46 > bytes.length || v.getUint32(p, true) !== 0x02014b50)
       throw Error("Corrupt ZIP directory");
@@ -71,6 +72,11 @@ export async function unzipHlg(bytes) {
       name = utf8.decode(bytes.subarray(p + 46, p + 46 + n));
     p += 46 + n + extra + comment;
     if (!/\.hlg$/i.test(name)) continue;
+    totalExpanded += expanded;
+    if (totalExpanded > 512 * 1024 * 1024)
+      throw Error(
+        "Combined HLG streams exceed the 512 MB browser decoder limit",
+      );
     if (expanded > 512 * 1024 * 1024)
       throw Error("HLG exceeds the 512 MB browser decoder limit");
     if (local + 30 > bytes.length || v.getUint32(local, true) !== 0x04034b50)
@@ -115,6 +121,32 @@ export async function unzipHlg(bytes) {
   return entries;
 }
 export function parseHlg(bytes) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const pieces = [];
+  let start = 0,
+    declared = false;
+  for (let offset = 0; offset < bytes.length;) {
+    if (offset + 5 > bytes.length) throw Error("Truncated HLG record");
+    const type = bytes[offset],
+      length = view.getUint32(offset + 1);
+    if (length < 5 || offset + length > bytes.length)
+      throw Error("Invalid HLG record length");
+    if (
+      offset > start &&
+      ((type === 1 && declared) || (type === 6 && declared))
+    ) {
+      pieces.push(bytes.subarray(start, offset));
+      start = offset;
+      declared = false;
+    }
+    if (type === 6) declared = true;
+    offset += length;
+  }
+  pieces.push(bytes.subarray(start));
+  const logs = pieces.map(parseHlgSingle);
+  return logs.length === 1 ? logs[0] : mergeHlgSessions(logs);
+}
+function parseHlgSingle(bytes) {
   const v = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength),
     records = [];
   let names = [],
@@ -173,6 +205,13 @@ export function parseHlg(bytes) {
   }
   if (!names.length || names.length !== ids.length)
     throw Error("HLG channel definitions do not match");
+  if (new Set(ids).size !== ids.length)
+    throw Error("Duplicate HLG channel IDs");
+  if (names.length * rows > 64000000)
+    throw Error("HLG exceeds the browser sample limit");
+  names.forEach((channel, index) => {
+    channel.channelId = ids[index];
+  });
   // This version handles one channel declaration; reject rather than silently
   // misalign channels when a file changes its declaration mid-stream.
   const data = names.map(() => new Float64Array(rows)),
@@ -196,5 +235,87 @@ export function parseHlg(bytes) {
       data[c][r] = value;
     }
   }
-  return { channels: names, time, data, errCodes, rows };
+  return {
+    channels: names,
+    time,
+    data,
+    errCodes,
+    rows,
+    startTimeMilliseconds: origin ?? 0,
+  };
+}
+export function mergeHlgSessions(logs) {
+  if (!logs.length) throw Error("No HLG sessions");
+  if (logs.length === 1) return logs[0];
+  const channels = [],
+    index = new Map(),
+    usedNames = new Set();
+  let rows = 0;
+  const key = (c) => `${c.channelId}:${c.unitId}`;
+  for (const log of logs) {
+    rows += log.rows;
+    for (const c of log.channels) {
+      const k = key(c);
+      if (index.has(k)) continue;
+      let name = c.name;
+      if (usedNames.has(name)) {
+        let suffix = 2;
+        while (usedNames.has(`${name} #${suffix}`)) suffix++;
+        name += ` #${suffix}`;
+      }
+      usedNames.add(name);
+      index.set(k, channels.length);
+      channels.push({ ...c, name, idx: channels.length });
+    }
+  }
+  if (rows * channels.length > 64000000)
+    throw Error("Merged HLG exceeds the browser sample limit");
+  const time = new Float64Array(rows),
+    data = channels.map(() => new Float64Array(rows).fill(NaN)),
+    errCodes = channels.map(() => null),
+    sessions = [];
+  const origin = logs[0].startTimeMilliseconds;
+  let cursor = 0;
+  for (const log of logs) {
+    if (!log.rows) continue;
+    let offset = (log.startTimeMilliseconds - origin) / 1000,
+      adjusted = false;
+    if (cursor && offset + log.time[0] <= time[cursor - 1]) {
+      let step = 0.001;
+      for (let r = 1; r < log.rows; r++) {
+        const delta = log.time[r] - log.time[r - 1];
+        if (delta > 0) {
+          step = delta;
+          break;
+        }
+      }
+      offset = time[cursor - 1] + step - log.time[0];
+      adjusted = true;
+    }
+    sessions.push({
+      startRow: cursor,
+      rows: log.rows,
+      offsetSeconds: offset,
+      clockAdjusted: adjusted,
+    });
+    for (let r = 0; r < log.rows; r++) time[cursor + r] = log.time[r] + offset;
+    for (let c = 0; c < log.channels.length; c++) {
+      const target = index.get(key(log.channels[c]));
+      data[target].set(log.data[c], cursor);
+      if (log.errCodes[c]) {
+        errCodes[target] ??= new Int32Array(rows);
+        errCodes[target].set(log.errCodes[c], cursor);
+      }
+    }
+    cursor += log.rows;
+  }
+  return {
+    channels,
+    time,
+    data,
+    errCodes,
+    rows,
+    startTimeMilliseconds: origin,
+    sessions,
+  };
 }
