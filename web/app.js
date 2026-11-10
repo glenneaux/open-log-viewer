@@ -36694,6 +36694,15 @@ ${o.rowName}: ${Sa(fu(a.rv, o.dec.row.token), o.rowCh)}${p}`;
     return !1;
   }
   var _c = 2;
+  document.getElementById('btn-export-csv').addEventListener('click',async()=>{
+    const button=document.getElementById('btn-export-csv');button.disabled=true;
+    try {
+      const log=l.loadedLogs.find(item=>item.id===l.mainLogId);
+      const {downloadCsv}=await import('./csv-export.js');
+      await downloadCsv(log);
+    } catch(error){me(error.message,'error');}
+    finally{button.disabled=false;}
+  });
   function pm() {
     return l.loadedLogs.length < _c || Qt()
       ? !0

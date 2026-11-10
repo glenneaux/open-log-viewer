@@ -8,6 +8,10 @@ Requires Node.js 24 or newer. Run `node server.mjs` and open http://127.0.0.1:41
 
 For the desktop wrapper, run `pnpm install`, `node node_modules/electron/install.js`, then `pnpm desktop`.
 
+## CSV export
+
+Select the main log and click **Export CSV**. This exports all recorded channels and samples (not just visible traces), using Haltech-style `Channel`/`Type` headers. Values retain their native representation and type metadata, rather than being converted to the current display units. Error codes are preserved; missing values are blank. Calculated channels are excluded. Timestamps are relative to the log start, at millisecond precision.
+
 ## Tracking remaining work
 
 - [Log files to collect and reference exports](docs/FIXTURES.md)

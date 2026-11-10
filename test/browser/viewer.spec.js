@@ -1,5 +1,14 @@
 import { test, expect } from "@playwright/test";
 import {fileURLToPath} from 'node:url';
+test('exports the active log as CSV',async({page})=>{
+ await page.goto('/');
+ await page.locator('#file-input').setInputFiles({name:'example.csv',mimeType:'text/csv',buffer:Buffer.from('Time,RPM\n0,1000\n1,2000\n')});
+ await expect(page.locator('#file-info')).toContainText('2 samples');
+ const pending=page.waitForEvent('download');await page.locator('#btn-export-csv').click();
+ const download=await pending;expect(download.suggestedFilename()).toBe('example-export.csv');
+ const stream=await download.createReadStream();let csv='';for await(const chunk of stream)csv+=chunk.toString();
+ expect(csv).toContain('Channel : RPM');expect(csv).toContain('00:00:01.000,2000');
+});
 test('imports a synthetic MLVLG v2 file',async({page})=>{
  await page.goto('/');
  await page.locator('#file-input').setInputFiles(fileURLToPath(new URL('../fixtures/synthetic.mlg',import.meta.url)));
